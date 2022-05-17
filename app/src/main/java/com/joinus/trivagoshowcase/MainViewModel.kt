@@ -11,8 +11,11 @@ import repositories.MainRepository
 import services.network.ApiResponse
 import services.mappers.Business
 import services.mappers.BusinessDetails
+import services.network.YelpServices
+import javax.inject.Inject
 
 class MainViewModel : ViewModel() {
+
     private val _businesses = MutableLiveData<List<Business>>(emptyList())
     private val businesses: LiveData<List<Business>> = _businesses
 
@@ -21,7 +24,7 @@ class MainViewModel : ViewModel() {
 
     fun getBusinesses(term: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = MainRepository.getBusinesses(term)
+            val response = MainRepository().getBusinesses(term)
             if (response is ApiResponse.Success) {
                 _businesses.postValue(response.data!!)
                 Log.d("firstLog", "${response.data}")
@@ -34,7 +37,7 @@ class MainViewModel : ViewModel() {
 
     fun getBusinessDetails(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = MainRepository.getBusinessDetails(id)
+            val response = MainRepository().getBusinessDetails(id)
             if (response is ApiResponse.Success) {
                 _details.postValue(response.data!!)
                 Log.d("firstLog", "${response.data}")
