@@ -10,14 +10,12 @@ import services.network.YelpServices
 import java.io.IOException
 import javax.inject.Inject
 
-class MainRepository @Inject constructor() {
+class MainRepository @Inject constructor(private val yelpServices: YelpServices) {
 
-    @Inject lateinit var yelpApi: YelpServices
-
-    suspend fun getBusinesses(term: String): ApiResponse<List<Business>> {
+    suspend fun getBusinesses(lat: Double, lng: Double): ApiResponse<List<Business>> {
         return try {
-            val response = yelpApi
-                .getBusinesses(term = term)
+            val response = yelpServices
+                .getBusinesses(lat, lng)
             val businessList = response
                 .businesses.map {
                     MapperImpl.toBusinessModel(it)

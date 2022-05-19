@@ -1,5 +1,7 @@
 package services.mappers
 
+import com.google.android.gms.maps.model.LatLng
+
 data class Business(
     val id: String,
     val name: String,
@@ -8,9 +10,4 @@ data class Business(
     val price: String,
     val rating: Float,
     val latLng: LatLng,
-) {
-    data class LatLng(
-        val lat: Double,
-        val lng: Double,
-    )
-}
+)
