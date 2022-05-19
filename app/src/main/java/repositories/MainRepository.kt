@@ -6,15 +6,16 @@ import services.mappers.Business
 import services.mappers.MapperImpl
 import services.network.RetrofitInstance
 import services.mappers.BusinessDetails
+import services.network.YelpServices
 import java.io.IOException
+import javax.inject.Inject
 
-object MainRepository {
+class MainRepository @Inject constructor(private val yelpServices: YelpServices) {
 
-    suspend fun getBusinesses(term: String): ApiResponse<List<Business>> {
+    suspend fun getBusinesses(lat: Double, lng: Double): ApiResponse<List<Business>> {
         return try {
-            val response = RetrofitInstance
-                .getYelpServices()
-                .getBusinesses(term = term)
+            val response = yelpServices
+                .getBusinesses(lat, lng)
             val businessList = response
                 .businesses.map {
                     MapperImpl.toBusinessModel(it)

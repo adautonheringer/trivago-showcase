@@ -1,5 +1,6 @@
 package services.mappers
 
+import com.google.android.gms.maps.model.LatLng
 import services.network.GetBusinessDetailsResponse
 import services.network.GetBusinessesResponse
 
@@ -12,9 +13,9 @@ object MapperImpl : Mapper {
             categories = businessesResponse.categories.map { it.title },
             price = businessesResponse.price ?: "$",
             rating = businessesResponse.rating,
-            latLng = Business.LatLng(
-                lat = businessesResponse.coordinates.latitude,
-                lng = businessesResponse.coordinates.longitude,
+            latLng = LatLng(
+                businessesResponse.coordinates.latitude,
+                businessesResponse.coordinates.longitude,
             )
         )
     }

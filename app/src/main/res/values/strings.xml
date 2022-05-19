@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Trivago Showcase</string>
+    <item name="latLng" type="id" />
 </resources>

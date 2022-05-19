@@ -1,47 +1,68 @@
 package com.joinus.trivagoshowcase
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import repositories.MainRepository
 import services.network.ApiResponse
-import services.mappers.Business
-import services.mappers.BusinessDetails
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
-    private val _businesses = MutableLiveData<List<Business>>(emptyList())
-    private val businesses: LiveData<List<Business>> = _businesses
+@HiltViewModel
+class MainViewModel @Inject constructor(private val repository: MainRepository) : ViewModel() {
 
-    private val _details = MutableLiveData<BusinessDetails>()
-    private val details: LiveData<BusinessDetails> = _details
+    private val _viewState = MutableStateFlow(MainViewState())
+    val viewState: StateFlow<MainViewState> = _viewState.asStateFlow()
 
-    fun getBusinesses(term: String) {
+    init {
+        getBusinesses()
+    }
+
+    fun getBusinesses(lat: Double = 51.233334, lng: Double = 6.783333) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = MainRepository.getBusinesses(term)
+            _viewState.update { it.copy(isLoading = true) }
+            val response = repository.getBusinesses(lat, lng)
             if (response is ApiResponse.Success) {
-                _businesses.postValue(response.data!!)
-                Log.d("firstLog", "${response.data}")
+                _viewState.update {
+                    it.copy(isLoading = false, businesses = response.data, snapedViewId = response.data.first().id)
+                }
             }
             if (response is ApiResponse.Error) {
-                Log.d("firstLog", "${response.exception}")
+                _viewState.update {
+                    it.copy(isLoading = false, isError = true)
+                }
             }
+        }
+    }
+
+    fun onMapOverlayViewClicked(position: Int?) {
+        _viewState.update {
+            it.copy(onMapViewClick = position)
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    fun onSnapView(id: String) {
+        _viewState.update {
+            it.copy(snapedViewId = id)
         }
     }
 
     fun getBusinessDetails(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = MainRepository.getBusinessDetails(id)
-            if (response is ApiResponse.Success) {
-                _details.postValue(response.data!!)
-                Log.d("firstLog", "${response.data}")
-            }
-            if (response is ApiResponse.Error) {
-                Log.d("firstLog", "${response.exception}")
-            }
+            _viewState.emit(_viewState.value.copy(isLoading = true))
+            val response = repository.getBusinessDetails(id)
+
+//            if (response is ApiResponse.Success) {
+//
+//            }
+//            if (response is ApiResponse.Error) {
+//                _viewState.emit(_viewState.value.copy(isLoading = false))
+//            }
         }
     }
+
 }
