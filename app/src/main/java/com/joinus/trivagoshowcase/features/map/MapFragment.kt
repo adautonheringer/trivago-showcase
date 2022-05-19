@@ -25,9 +25,16 @@ import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
 import com.joinus.trivagoshowcase.helpers.extensions.getNavigationBarHeight
+import com.joinus.trivagoshowcase.helpers.extensions.toDp
+import com.joinus.trivagoshowcase.helpers.extensions.toPx
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 
 import services.mappers.Business
+import kotlin.math.*
 
 @AndroidEntryPoint
 class MapFragment : Fragment() {
@@ -55,14 +62,16 @@ class MapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenResumed {
-            viewModel.viewState.collect {
-                if (it.businesses.isNotEmpty()) {
-                    populateMap(it.businesses)
+            viewModel.viewState
+                .collect {
+                    if (it.businesses.isNotEmpty()) {
+                        populateMap(it.businesses)
+                    }
+                    if (it.snapedViewId != null) {
+                        highlightView(it.snapedViewId)
+                    }
                 }
-                if (it.snapedViewId != null) {
-                    highlightView(it.snapedViewId)
-                }
-            }
+
         }
     }
 
@@ -102,22 +111,29 @@ class MapFragment : Fragment() {
             mapViewBundle = savedInstanceState.getBundle("MapViewBundleKey")
         }
         mapView.onCreate(mapViewBundle)
+        val offSet = activity?.resources?.displayMetrics?.heightPixels?.times(0.30)?.toInt() ?: 0
         mapView.getMapAsync { map ->
             googleMap = map
             googleMap.apply {
-                setPadding(0, 0, 0, requireActivity().getNavigationBarHeight())
+                setPadding(0, 0, 0, offSet)
                 setOnCameraMoveListener {
                     mapOverlay
                         .children
                         .forEach { setViewPosition(it) }
+                }
+                setOnCameraMoveStartedListener {
+                    when (it) {
+                        GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE -> viewModel.refreshButton(true)
+                        else -> {}
+                    }
                 }
                 setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle))
             }
         }
     }
 
-    private fun highlightView(businessId: String?) {
-        businessId?.let { id ->
+    private fun highlightView(businessId: String) {
+        businessId.let { id ->
             mapOverlay
                 .children
                 .forEach { view ->
@@ -130,7 +146,7 @@ class MapFragment : Fragment() {
                     }
                 }
         }
-        animateMap(businesses.firstOrNull { it.id == businessId })
+        animateMap(businesses.firstOrNull { it.id == businessId }, businesses)
     }
 
     private fun setScale(views: List<View>, scale: Float = 1.1f) {
@@ -158,6 +174,11 @@ class MapFragment : Fragment() {
     }
 
     private fun animateMap(businesses: List<Business>) {
+        val mapHeight =
+            activity?.resources?.displayMetrics?.heightPixels?.times(0.7)?.toInt()
+                ?.toDp()?.toFloat()
+                ?: 0f
+        val mapWidth = mapView.measuredWidth.toDp().toFloat()
         if (businesses.isEmpty()) return
         val latLngs: List<LatLng> = businesses.map { it.latLng }
         val latLngBounds = LatLngBounds.builder().apply {
@@ -165,17 +186,34 @@ class MapFragment : Fragment() {
                 include(it)
             }
         }.build()
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100))
+        googleMap.animateCamera(
+            CameraUpdateFactory.newCameraPosition(
+                getCameraPosition(
+                    latLngBounds,
+                    mapWidth,
+                    mapHeight
+                )
+            )
+        )
     }
 
-    private fun animateMap(business: Business?) {
+    private fun animateMap(business: Business?, businesses: List<Business>) {
+        val mapHeight =
+            activity?.resources?.displayMetrics?.heightPixels?.times(0.5)?.toInt()
+                ?.toDp()?.toFloat()
+                ?: 0f
+        val mapWidth = mapView.measuredWidth.toDp().toFloat()
+        val latLngBounds = LatLngBounds.builder().apply {
+            businesses
+                .map { it.latLng }
+                .forEach {
+                    include(it)
+                }
+        }.build()
         business?.let {
             googleMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.fromLatLngZoom(
-                        it.latLng,
-                        13f
-                    )
+                    getCameraPosition(latLngBounds, mapWidth, mapHeight)
                 )
             )
         }
@@ -214,4 +252,46 @@ class MapFragment : Fragment() {
         }
     }
 
+    private fun getCameraPosition(
+        latLngBounds: LatLngBounds,
+        mapWidth: Float,
+        mapHeight: Float
+    ): CameraPosition =
+        CameraPosition
+            .Builder()
+            .target(latLngBounds.center)
+            .zoom(getBoundsZoomLevel(latLngBounds, mapWidth, mapHeight))
+            .build()
+
+    private fun getBoundsZoomLevel(
+        bounds: LatLngBounds,
+        mapWidthPx: Float,
+        mapHeightPx: Float
+    ): Float {
+        val ne = bounds.northeast
+        val sw = bounds.southwest
+        val latFraction = (latRad(ne.latitude) - latRad(sw.latitude)) / PI
+        val lngDiff = ne.longitude - sw.longitude
+        val lngFraction = (if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
+        val latZoom = zoom(mapHeightPx * 0.8f, WORLD_DP_HEIGHT, latFraction)
+        val lngZoom = zoom(mapWidthPx * 0.8f, WORLD_DP_WIDTH, lngFraction)
+        val result = min(latZoom, lngZoom)
+        return min(result, MAX_ZOOM).toFloat()
+    }
+
+    private fun latRad(lat: Double): Double {
+        val sin = sin(lat * PI / 180)
+        val radX2 = ln((1 + sin) / (1 - sin)) / 2
+        return max(min(radX2, PI), -PI) / 2
+    }
+
+    private fun zoom(mapPx: Float, worldPx: Float, fraction: Double): Double {
+        return log2(mapPx / worldPx / fraction)
+    }
+
+    companion object {
+        private const val MAX_ZOOM: Double = 16.0
+        private const val WORLD_DP_HEIGHT = 256f
+        private const val WORLD_DP_WIDTH = 256f
+    }
 }

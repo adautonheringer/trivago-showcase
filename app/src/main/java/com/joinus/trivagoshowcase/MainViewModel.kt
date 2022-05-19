@@ -27,7 +27,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
             val response = repository.getBusinesses(lat, lng)
             if (response is ApiResponse.Success) {
                 _viewState.update {
-                    it.copy(isLoading = false, businesses = response.data, snapedViewId = response.data.first().id)
+                    it.copy(isLoading = false, businesses = response.data)
                 }
             }
             if (response is ApiResponse.Error) {
@@ -44,10 +44,15 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
         }
     }
 
-    @OptIn(FlowPreview::class)
     fun onSnapView(id: String) {
         _viewState.update {
             it.copy(snapedViewId = id)
+        }
+    }
+
+    fun refreshButton(isVisible: Boolean) {
+        _viewState.update {
+            it.copy(refreshButtonIsVisible = isVisible)
         }
     }
 

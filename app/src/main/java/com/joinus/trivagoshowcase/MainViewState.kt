@@ -9,6 +9,7 @@ data class MainViewState(
     val onMapViewClick: Int? = null,
     val snapedViewId: String? = null,
     val isGoingToBusinessDetails: Boolean = false,
+    val refreshButtonIsVisible: Boolean = false,
 )
 
 //sealed class MainVS {

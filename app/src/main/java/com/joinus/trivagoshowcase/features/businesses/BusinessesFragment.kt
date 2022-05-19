@@ -26,6 +26,7 @@ import com.joinus.trivagoshowcase.helpers.extensions.toDp
 import com.joinus.trivagoshowcase.helpers.extensions.toPx
 import com.joinus.trivagoshowcase.helpers.snap.OnSnapPositionChangeListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.debounce
 import services.mappers.Business
 
 @AndroidEntryPoint
@@ -103,7 +104,7 @@ class BusinessesFragment : Fragment() {
     private fun setRecyclerViewLayoutParams(view: View) {
         val navBarHeight = requireActivity().getNavigationBarHeight()
 
-        view.setPadding(16.toPx(), 0, 16.toPx(), navBarHeight.times(1.55).toInt())
+        view.setPadding(16.toPx(), 0, 16.toPx(), navBarHeight)
     }
 
     private fun animateHighlight(view: View) {
