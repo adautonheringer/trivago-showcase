@@ -5,7 +5,9 @@
       <map>
         <entry key="app/src/main/res/drawable/rounded_shape.xml" value="0.528" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.30583873957367935" />
+        <entry key="app/src/main/res/layout/business_cardview.xml" value="0.33" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="1.0" />
+        <entry key="app/src/main/res/layout/fragment_businesses.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_map.xml" value="0.30583873957367935" />
       </map>
     </option>

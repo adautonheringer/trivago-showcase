@@ -25,21 +25,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:id="@+id/businesses_container"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent" />-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/businesses_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:id="@+id/search_container"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent" />-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/search_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <TextView
+        <View
             android:id="@+id/my_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Loading Yeah"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

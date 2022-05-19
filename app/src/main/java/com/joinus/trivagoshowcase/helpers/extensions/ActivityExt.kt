@@ -1,4 +1,4 @@
-package com.joinus.trivagoshowcase.extensions
+package com.joinus.trivagoshowcase.helpers.extensions
 
 import android.app.Activity
 import android.view.View

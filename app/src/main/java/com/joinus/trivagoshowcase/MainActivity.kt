@@ -8,7 +8,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.joinus.trivagoshowcase.databinding.ActivityMainBinding
-import com.joinus.trivagoshowcase.extensions.setStatusBarTransparent
+import com.joinus.trivagoshowcase.helpers.extensions.setStatusBarTransparent
+import com.joinus.trivagoshowcase.features.businesses.BusinessesFragment
 import com.joinus.trivagoshowcase.features.map.MapFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -30,10 +31,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.viewState.collect {
-                    when {
-                        it.isLoading -> Log.d("firstLog", "isLoading")
-                        it.isError -> Log.d("firstLog", "isError")
-                    }
+
                 }
             }
         }
@@ -51,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchBusinessesFragment() {
-
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.businesses_container, BusinessesFragment(), "businessesFragment")
+            .commit()
     }
 }

@@ -16,12 +16,13 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
-import com.joinus.trivagoshowcase.extensions.getNavigationBarHeight
+import com.joinus.trivagoshowcase.helpers.extensions.getNavigationBarHeight
 import dagger.hilt.android.AndroidEntryPoint
 
 import services.mappers.Business
@@ -33,6 +34,7 @@ class MapFragment : Fragment() {
     private lateinit var mapView: MapView
     private lateinit var mapOverlay: FrameLayout
     private lateinit var googleMap: GoogleMap
+    private var businesses: List<Business> = emptyList()
     val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -40,7 +42,7 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMapBinding.inflate(layoutInflater)
+        binding = FragmentMapBinding.inflate(inflater, container, false)
         mapView = binding.map
         mapOverlay = binding.mapOverlay
         initGoogleMap(savedInstanceState)
@@ -122,6 +124,7 @@ class MapFragment : Fragment() {
                     }
                 }
         }
+        animateMap(businesses.filter { it.id == businessId }.firstOrNull())
     }
 
     private fun setScale(views: List<View>, scale: Float = 1.1f) {
@@ -139,10 +142,13 @@ class MapFragment : Fragment() {
     }
 
     private fun populateMap(businesses: List<Business>) {
-        businesses.forEach {
-            setViewPosition(addViewToMapOverlay(it.id, it.latLng, it.latLng.latitude))
+        if (this.businesses != businesses) {
+            this.businesses = businesses
+            businesses.forEach {
+                setViewPosition(addViewToMapOverlay(it.id, it.latLng, it.latLng.latitude))
+            }
+            animateMap(businesses)
         }
-        animateMap(businesses)
     }
 
     private fun animateMap(businesses: List<Business>) {
@@ -154,6 +160,19 @@ class MapFragment : Fragment() {
             }
         }.build()
         googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100))
+    }
+
+    private fun animateMap(business: Business?) {
+        business?.let {
+            googleMap.animateCamera(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.fromLatLngZoom(
+                        it.latLng,
+                        googleMap.cameraPosition.zoom
+                    )
+                )
+            )
+        }
     }
 
     private fun addViewToMapOverlay(businessId: String, latLng: LatLng, price: Double): View? {
