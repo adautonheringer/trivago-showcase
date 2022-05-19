@@ -4,10 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import repositories.MainRepository
 import services.network.ApiResponse
@@ -29,7 +27,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
             val response = repository.getBusinesses(lat, lng)
             if (response is ApiResponse.Success) {
                 _viewState.update {
-                    it.copy(isLoading = false, businesses = response.data, highlightedBusinessId = response.data.first().id)
+                    it.copy(isLoading = false, businesses = response.data, snapedViewId = response.data.first().id)
                 }
             }
             if (response is ApiResponse.Error) {
@@ -40,9 +38,16 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
         }
     }
 
-    fun onMapOverlayViewClicked(businessId: String) {
+    fun onMapOverlayViewClicked(position: Int?) {
         _viewState.update {
-            it.copy(highlightedBusinessId = businessId)
+            it.copy(onMapViewClick = position)
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    fun onSnapView(id: String) {
+        _viewState.update {
+            it.copy(snapedViewId = id)
         }
     }
 

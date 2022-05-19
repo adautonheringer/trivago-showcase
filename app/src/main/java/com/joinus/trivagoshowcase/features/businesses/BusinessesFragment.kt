@@ -64,7 +64,7 @@ class BusinessesFragment : Fragment() {
                 snapHelper = snapHelper,
                 onSnapPositionChangeListener = object : OnSnapPositionChangeListener {
                     override fun onSnapPositionChange(position: Int) {
-                        viewModel.onMapOverlayViewClicked(
+                        viewModel.onSnapView(
                             businessesAdapter.getBusinessByPosition(
                                 position
                             ).id
@@ -87,6 +87,10 @@ class BusinessesFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             viewModel.viewState.collect {
                 businessesAdapter.updateList(it.businesses)
+
+                it.onMapViewClick?.let { position ->
+                    businessesRecyclerView.smoothScrollToPosition(position)
+                }
             }
         }
     }

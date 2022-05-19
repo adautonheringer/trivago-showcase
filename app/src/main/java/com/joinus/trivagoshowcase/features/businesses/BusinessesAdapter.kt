@@ -72,6 +72,7 @@ class BusinessesAdapter(private val onClick: (Business) -> Unit) :
 
 
         fun bindView(position: Int) {
+//            itemView.id = businesses[position].id.hashCode()
             val business = businesses[position]
             val image = itemView.findViewById<ImageView>(R.id.image)
             val title = itemView.findViewById<TextView>(R.id.title)

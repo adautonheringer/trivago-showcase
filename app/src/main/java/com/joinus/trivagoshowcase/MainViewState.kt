@@ -6,7 +6,8 @@ data class MainViewState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val businesses: List<Business> = emptyList(),
-    val highlightedBusinessId: String? = null,
+    val onMapViewClick: Int? = null,
+    val snapedViewId: String? = null,
     val isGoingToBusinessDetails: Boolean = false,
 )
 

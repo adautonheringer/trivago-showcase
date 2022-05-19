@@ -3,6 +3,7 @@ package com.joinus.trivagoshowcase.features.map
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
@@ -54,8 +56,12 @@ class MapFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             viewModel.viewState.collect {
-                populateMap(it.businesses)
-                highlightView(it.highlightedBusinessId)
+                if (it.businesses.isNotEmpty()) {
+                    populateMap(it.businesses)
+                }
+                if (it.snapedViewId != null) {
+                    highlightView(it.snapedViewId)
+                }
             }
         }
     }
@@ -105,10 +111,10 @@ class MapFragment : Fragment() {
                         .children
                         .forEach { setViewPosition(it) }
                 }
+                setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle))
             }
         }
     }
-
 
     private fun highlightView(businessId: String?) {
         businessId?.let { id ->
@@ -124,7 +130,7 @@ class MapFragment : Fragment() {
                     }
                 }
         }
-        animateMap(businesses.filter { it.id == businessId }.firstOrNull())
+        animateMap(businesses.firstOrNull { it.id == businessId })
     }
 
     private fun setScale(views: List<View>, scale: Float = 1.1f) {
@@ -168,7 +174,7 @@ class MapFragment : Fragment() {
                 CameraUpdateFactory.newCameraPosition(
                     CameraPosition.fromLatLngZoom(
                         it.latLng,
-                        googleMap.cameraPosition.zoom
+                        13f
                     )
                 )
             )
@@ -184,7 +190,8 @@ class MapFragment : Fragment() {
             setTag(R.id.latLng, latLng)
             findViewById<TextView>(R.id.price_value).text = price.toString().takeLast(3)
             setOnClickListener {
-                viewModel.onMapOverlayViewClicked(businessId)
+                viewModel.onMapOverlayViewClicked(businesses.indexOfFirst { it.id == businessId })
+                viewModel.onMapOverlayViewClicked(null)
             }
         }
         mapOverlay
@@ -195,7 +202,6 @@ class MapFragment : Fragment() {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                 )
             )
-
         return view
     }
 
