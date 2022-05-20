@@ -2,7 +2,6 @@ package com.joinus.trivagoshowcase.features.map
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -31,11 +30,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.view.children
-import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -46,15 +43,8 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
-import com.joinus.trivagoshowcase.helpers.extensions.getNavigationBarHeight
-import com.joinus.trivagoshowcase.helpers.extensions.getStatusBarHeight
 import com.joinus.trivagoshowcase.helpers.extensions.toDp
-import com.joinus.trivagoshowcase.helpers.extensions.toPx
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 
 import services.mappers.Business
 import kotlin.math.*
@@ -78,7 +68,7 @@ class MapFragment : Fragment() {
         mapView = binding.map
         mapOverlay = binding.mapOverlay
         initGoogleMap(savedInstanceState)
-        binding.searchButton.apply {
+        binding.searchButtonContainer.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 RefreshButton(viewModel = viewModel) { getCurrentLatLng() }
@@ -91,20 +81,24 @@ class MapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenResumed {
-            viewModel.viewState
+            viewModel.mapViewState
                 .collect {
-                    if (it.isLoading) {
-                        removeViews()
-                    }
-                    if (it.businesses.isNotEmpty()) {
-                        populateMap(it.businesses)
-                    }
-                    if (it.snapedViewId != null) {
-                        highlightView(it.snapedViewId)
+                    when {
+                        it.isLoading -> removeViews()
+                        it.isError -> handleError()
+                        else -> {
+                            if (it.businesses.isNotEmpty()) populateMap(it.businesses)
+                            if (it.snapedViewId != null) highlightView(it.snapedViewId)
+                        }
                     }
                 }
         }
     }
+
+    private fun handleError() {
+
+    }
+
     private fun removeViews() {
         mapOverlay.removeAllViews()
     }
@@ -164,7 +158,6 @@ class MapFragment : Fragment() {
                     when (it) {
                         GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE -> {
                             viewModel.refreshButton(true)
-                            Log.d("firstLog", "MOVEU")
                         }
                         else -> {}
                     }
@@ -346,23 +339,15 @@ class MapFragment : Fragment() {
 
 @Composable
 fun RefreshButton(viewModel: MainViewModel, onClick: () -> Unit) {
-    val state by viewModel.viewState.collectAsState()
+    val state by viewModel.mapViewState.collectAsState()
     val density = LocalDensity.current
     AnimatedVisibility(
-        visible = state.refreshButtonIsVisible,
-        enter = slideInVertically {
-            // Slide in from 40 dp from the top.
-            with(density) { -40.dp.roundToPx() }
-        } + expandVertically(
-            // Expand from the top.
-            expandFrom = Alignment.Top
-        ) + fadeIn(
-            // Fade in with the initial alpha of 0.3f.
-            initialAlpha = 0.3f
-        ),
+        visible = state.isRefreshButtonVisible,
+        enter = slideInVertically { with(density) { -40.dp.roundToPx() } }
+                + expandVertically(expandFrom = Alignment.Top) + fadeIn(initialAlpha = 0.3f),
         exit = slideOutVertically() + shrinkVertically() + fadeOut()
     ) {
-        Row(modifier = Modifier.padding(16.dp)) {
+        Row(modifier = Modifier.padding(32.dp)) {
             Button(
                 modifier = Modifier.height(36.dp),
                 onClick = { onClick() },

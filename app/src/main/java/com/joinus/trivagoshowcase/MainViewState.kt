@@ -1,21 +1,38 @@
 package com.joinus.trivagoshowcase
 
+import android.view.View
 import services.mappers.Business
+import services.mappers.BusinessDetails
 
 data class MainViewState(
-    val isLoading: Boolean = false,
-    val isError: Boolean = false,
-    val businesses: List<Business> = emptyList(),
-    val onMapViewClick: Int? = null,
-    val snapedViewId: String? = null,
     val isGoingToBusinessDetails: Boolean = false,
-    val refreshButtonIsVisible: Boolean = false,
+    val isGoingBack: Boolean = false,
+    val sharedViews: List<View> = listOf(),
+    val business: Business? = null,
 )
 
-//sealed class MainVS {
-//    object Loading : MainVS()
-//    object Error: MainVS()
-//    object GoToBusinessDetails: MainVS()
-//    data class Businesses(val data: List<Business> = emptyList())
-//    data class SelectedBusiness
-//}
+data class SearchViewState(
+    val isLoading: Boolean = false,
+    val isError: Boolean = false,
+)
+
+data class BusinessesViewState(
+    val isLoading: Boolean = false,
+    val businesses: List<Business> = listOf(),
+    val mapViewPosition: Int? = null,
+    val isError: Boolean = false,
+)
+
+data class MapViewState(
+    val isLoading: Boolean = false,
+    val isRefreshButtonVisible: Boolean = false,
+    val businesses: List<Business> = listOf(),
+    val snapedViewId: String? = null,
+    val isError: Boolean = false,
+)
+
+data class DetailsViewState(
+    val isLoading: Boolean = false,
+    val businessDetails: BusinessDetails? = null,
+    val isError: Boolean = false,
+)
