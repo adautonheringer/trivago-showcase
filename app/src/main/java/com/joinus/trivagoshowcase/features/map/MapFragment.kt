@@ -93,6 +93,9 @@ class MapFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             viewModel.viewState
                 .collect {
+                    if (it.isLoading) {
+                        removeViews()
+                    }
                     if (it.businesses.isNotEmpty()) {
                         populateMap(it.businesses)
                     }
@@ -101,6 +104,9 @@ class MapFragment : Fragment() {
                     }
                 }
         }
+    }
+    private fun removeViews() {
+        mapOverlay.removeAllViews()
     }
 
     override fun onResume() {
@@ -145,6 +151,11 @@ class MapFragment : Fragment() {
             googleMap.apply {
                 setPadding(0, 0, 0, offSet)
                 setOnCameraMoveListener {
+                    mapOverlay
+                        .children
+                        .forEach { setViewPosition(it) }
+                }
+                setOnCameraChangeListener {
                     mapOverlay
                         .children
                         .forEach { setViewPosition(it) }
@@ -201,6 +212,7 @@ class MapFragment : Fragment() {
 
     private fun populateMap(businesses: List<Business>) {
         if (this.businesses != businesses) {
+            Log.d("firstLog", "sera????")
             this.businesses = businesses
             businesses.forEach {
                 setViewPosition(addViewToMapOverlay(it.id, it.latLng, it.latLng.latitude))

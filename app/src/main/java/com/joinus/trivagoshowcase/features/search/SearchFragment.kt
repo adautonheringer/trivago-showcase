@@ -61,7 +61,6 @@ fun MessageCard(
 ) {
     val state by viewModel.viewState.collectAsState()
     val context = LocalContext.current
-    val activity = context.getActivity()
     Column(
         modifier = Modifier
             .fillMaxWidth(),

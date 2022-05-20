@@ -47,6 +47,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
     }
 
     fun onSnapView(id: String) {
+        _viewState.debounce(200)
         _viewState.update {
             it.copy(snapedViewId = id)
         }

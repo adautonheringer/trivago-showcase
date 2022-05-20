@@ -65,13 +65,12 @@ class BusinessesFragment : Fragment() {
                 snapHelper = snapHelper,
                 onSnapPositionChangeListener = object : OnSnapPositionChangeListener {
                     override fun onSnapPositionChange(position: Int) {
+
                         viewModel.onSnapView(
                             businessesAdapter.getBusinessByPosition(
                                 position
                             ).id
                         )
-
-
                         val snapedView = myLayoutManager.findViewByPosition(position)
                         val leftView = myLayoutManager.findViewByPosition(position - 1)
                         val rightView = myLayoutManager.findViewByPosition(position + 1)
