@@ -35,10 +35,14 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
         binding.viewModel = viewModel
+        binding.retryButton.setOnClickListener {
+            viewModel.retry()
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.mainViewState.collect {
+                    handleError(it.isError)
                     when {
                         it.isGoingToBusinessDetails -> {
                             setStatusBarColor(binding.root, R.color.light_gray)
@@ -57,6 +61,10 @@ class MainActivity : AppCompatActivity() {
         launchMapFragment()
         launchBusinessesFragment()
         launchSearchFragment()
+    }
+
+    private fun handleError(isError: Boolean) {
+        binding.errorScreen.visibility = if(isError) View.VISIBLE else View.GONE
     }
 
     override fun onBackPressed() {

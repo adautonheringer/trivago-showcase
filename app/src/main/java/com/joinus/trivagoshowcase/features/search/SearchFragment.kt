@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,32 +43,37 @@ class SearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MessageCard(viewModel)
+                MessageCard(viewModel) { onRefreshButtonClicked() }
             }
         }
+    }
+
+    private fun onRefreshButtonClicked() {
+        viewModel.onRefreshButtonClicked(true)
     }
 }
 
 
 @Composable
 fun MessageCard(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    onClick: () -> Unit
 ) {
     val state by viewModel.searchViewState.collectAsState()
-    val context = LocalContext.current
+    val density = LocalDensity.current
     Column(
         modifier = Modifier
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Surface(
             modifier = Modifier
                 .fillMaxWidth(.85f),
             color = colorResource(id = R.color.white),
             shape = CircleShape,
-            elevation = 4.dp,
+            elevation = 6.dp,
         ) {
             Row(
                 horizontalArrangement = Arrangement.Start,
@@ -117,10 +124,35 @@ fun MessageCard(
                     .fillMaxWidth(.75f)
                     .clip(CircleShape),
                 backgroundColor = colorResource(id = R.color.blue).copy(alpha = .5f),
-                color = colorResource(id = R.color.blue)
-            )
+                color = colorResource(id = R.color.blue),
+
+                )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        AnimatedVisibility(
+            visible = state.isRefreshButtonVisible,
+            enter = slideInVertically { with(density) { -40.dp.roundToPx() } }
+                    + expandVertically(expandFrom = Alignment.Top) + fadeIn(initialAlpha = 0.3f),
+            exit = slideOutVertically() + shrinkVertically() + fadeOut()
+        ) {
+            Row(modifier = Modifier.padding(16.dp)) {
+                Button(
+                    modifier = Modifier.height(36.dp),
+                    onClick = { onClick() },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.white),
+                        contentColor = colorResource(id = R.color.blue),
+                    ),
+                    shape = CircleShape,
+                    content = {
+                        Text(
+                            text = "REDO SEARCH IN THIS AREA",
+                            style = MaterialTheme.typography.subtitle2,
+                            fontWeight = FontWeight(700),
+                        )
+                    }
+                )
+            }
+        }
     }
 
 }

@@ -68,12 +68,7 @@ class MapFragment : Fragment() {
         mapView = binding.map
         mapOverlay = binding.mapOverlay
         initGoogleMap(savedInstanceState)
-        binding.searchButtonContainer.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                RefreshButton(viewModel = viewModel) { getCurrentLatLng() }
-            }
-        }
+
         return binding.root
     }
 
@@ -86,6 +81,7 @@ class MapFragment : Fragment() {
                     when {
                         it.isLoading -> removeViews()
                         it.isError -> handleError()
+                        it.onRefreshClicked -> getCurrentLatLng()
                         else -> {
                             if (it.businesses.isNotEmpty()) populateMap(it.businesses)
                             if (it.snapedViewId != null) highlightView(it.snapedViewId)
@@ -334,36 +330,5 @@ class MapFragment : Fragment() {
         private const val MAX_ZOOM: Double = 16.0
         private const val WORLD_DP_HEIGHT = 256f
         private const val WORLD_DP_WIDTH = 256f
-    }
-}
-
-@Composable
-fun RefreshButton(viewModel: MainViewModel, onClick: () -> Unit) {
-    val state by viewModel.mapViewState.collectAsState()
-    val density = LocalDensity.current
-    AnimatedVisibility(
-        visible = state.isRefreshButtonVisible,
-        enter = slideInVertically { with(density) { -40.dp.roundToPx() } }
-                + expandVertically(expandFrom = Alignment.Top) + fadeIn(initialAlpha = 0.3f),
-        exit = slideOutVertically() + shrinkVertically() + fadeOut()
-    ) {
-        Row(modifier = Modifier.padding(32.dp)) {
-            Button(
-                modifier = Modifier.height(36.dp),
-                onClick = { onClick() },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.white),
-                    contentColor = colorResource(id = R.color.blue),
-                ),
-                shape = CircleShape,
-                content = {
-                    Text(
-                        text = "REDO SEARCH IN THIS AREA",
-                        style = MaterialTheme.typography.subtitle2,
-                        fontWeight = FontWeight(700),
-                    )
-                }
-            )
-        }
     }
 }

@@ -43,13 +43,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:translationY="-6dp"
-                android:indeterminateTintMode="src_atop"
                 android:indeterminateTint="@color/blue"
-                app:layout_constraintTop_toBottomOf="@id/image"
-                app:layout_constraintStart_toStartOf="@id/image"
+                android:indeterminateTintMode="src_atop"
+                android:translationY="-6dp"
                 app:layout_constraintEnd_toEndOf="@id/image"
-                />
+                app:layout_constraintStart_toStartOf="@id/image"
+                app:layout_constraintTop_toBottomOf="@id/image" />
 
             <View
                 android:id="@+id/scrim"

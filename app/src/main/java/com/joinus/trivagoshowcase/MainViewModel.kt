@@ -37,9 +37,10 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
 
     fun getBusinesses(lat: Double = 51.233334, lng: Double = 6.783333) {
         viewModelScope.launch(Dispatchers.IO) {
-            _mapViewState.update { it.copy(isLoading = true, isRefreshButtonVisible = false) }
+            _mapViewState.update { it.copy(isLoading = true, onRefreshClicked = false) }
             _businessesViewState.update { it.copy(isLoading = true) }
-            _searchViewState.update { it.copy(isLoading = true) }
+            _searchViewState.update { it.copy(isLoading = true, isRefreshButtonVisible = false) }
+            _mainViewState.update { it.copy(isError = false) }
             val response = repository.getBusinesses(lat, lng)
             if (response is ApiResponse.Success) {
                 _mapViewState.update {
@@ -62,6 +63,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
                 _mapViewState.update { it.copy(isLoading = false, isError = true) }
                 _businessesViewState.update { it.copy(isLoading = false, isError = true) }
                 _searchViewState.update { it.copy(isLoading = false, isError = true) }
+                _mainViewState.update { it.copy(isError = true) }
             }
         }
     }
@@ -104,11 +106,25 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
     }
 
     fun refreshButton(isVisible: Boolean) {
-        _mapViewState.update { it.copy(isRefreshButtonVisible = isVisible) }
+        _searchViewState.update { it.copy(isRefreshButtonVisible = isVisible) }
+    }
+
+    fun onRefreshButtonClicked(isVisible: Boolean) {
+        _mapViewState.update { it.copy(onRefreshClicked = isVisible) }
     }
 
     fun onBackPressed() {
         _mainViewState.update { it.copy(isGoingBack = true, isGoingToBusinessDetails = false) }
+    }
+
+    fun retry() {
+        _mapViewState.update { MapViewState() }
+        _searchViewState.update { SearchViewState() }
+        _mainViewState.update { MainViewState() }
+        _detailsViewState.update { DetailsViewState() }
+        _businessesViewState.update { BusinessesViewState() }
+
+        getBusinesses()
     }
 
 

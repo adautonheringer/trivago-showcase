@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
@@ -54,6 +55,9 @@ class DetailsFragment : Fragment() {
             .into(binding.image)
         binding.title.text = business.name
 
+        binding.previous.setOnClickListener {
+            viewModel.onBackPressed()
+        }
 
         lifecycleScope.launchWhenResumed {
             viewModel.detailsViewState
