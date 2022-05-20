@@ -11,6 +11,7 @@ import com.joinus.trivagoshowcase.databinding.ActivityMainBinding
 import com.joinus.trivagoshowcase.helpers.extensions.setStatusBarTransparent
 import com.joinus.trivagoshowcase.features.businesses.BusinessesFragment
 import com.joinus.trivagoshowcase.features.map.MapFragment
+import com.joinus.trivagoshowcase.features.search.SearchFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         setStatusBarTransparent(binding.root, R.color.transparent)
         launchMapFragment()
         launchBusinessesFragment()
+        launchSearchFragment()
     }
 
     private fun launchMapFragment() {
@@ -52,6 +54,13 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager
             .beginTransaction()
             .add(R.id.businesses_container, BusinessesFragment(), "businessesFragment")
+            .commit()
+    }
+
+    private fun launchSearchFragment() {
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.search_container, SearchFragment(), "searchFragment")
             .commit()
     }
 }

@@ -34,3 +34,10 @@ fun Activity.getNavigationBarHeight(): Int {
         return if (resId > 0) it.getDimensionPixelSize(resId) else 0
     }
 }
+
+fun Activity.getStatusBarHeight(): Int {
+    this.resources.let {
+        val resId = it.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resId > 0) it.getDimensionPixelSize(resId) else 0
+    }
+}

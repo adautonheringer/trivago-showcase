@@ -2,6 +2,7 @@ package com.joinus.trivagoshowcase.features.map
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,10 +11,31 @@ import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.compose.animation.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.view.children
+import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -25,6 +47,7 @@ import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
 import com.joinus.trivagoshowcase.helpers.extensions.getNavigationBarHeight
+import com.joinus.trivagoshowcase.helpers.extensions.getStatusBarHeight
 import com.joinus.trivagoshowcase.helpers.extensions.toDp
 import com.joinus.trivagoshowcase.helpers.extensions.toPx
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,6 +78,12 @@ class MapFragment : Fragment() {
         mapView = binding.map
         mapOverlay = binding.mapOverlay
         initGoogleMap(savedInstanceState)
+        binding.searchButton.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                RefreshButton(viewModel = viewModel) { getCurrentLatLng() }
+            }
+        }
         return binding.root
     }
 
@@ -71,7 +100,6 @@ class MapFragment : Fragment() {
                         highlightView(it.snapedViewId)
                     }
                 }
-
         }
     }
 
@@ -123,13 +151,21 @@ class MapFragment : Fragment() {
                 }
                 setOnCameraMoveStartedListener {
                     when (it) {
-                        GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE -> viewModel.refreshButton(true)
+                        GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE -> {
+                            viewModel.refreshButton(true)
+                            Log.d("firstLog", "MOVEU")
+                        }
                         else -> {}
                     }
                 }
                 setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle))
             }
         }
+    }
+
+    private fun getCurrentLatLng() {
+        val latLng = googleMap.cameraPosition.target
+        viewModel.getBusinesses(latLng.latitude, latLng.longitude)
     }
 
     private fun highlightView(businessId: String) {
@@ -293,5 +329,44 @@ class MapFragment : Fragment() {
         private const val MAX_ZOOM: Double = 16.0
         private const val WORLD_DP_HEIGHT = 256f
         private const val WORLD_DP_WIDTH = 256f
+    }
+}
+
+@Composable
+fun RefreshButton(viewModel: MainViewModel, onClick: () -> Unit) {
+    val state by viewModel.viewState.collectAsState()
+    val density = LocalDensity.current
+    AnimatedVisibility(
+        visible = state.refreshButtonIsVisible,
+        enter = slideInVertically {
+            // Slide in from 40 dp from the top.
+            with(density) { -40.dp.roundToPx() }
+        } + expandVertically(
+            // Expand from the top.
+            expandFrom = Alignment.Top
+        ) + fadeIn(
+            // Fade in with the initial alpha of 0.3f.
+            initialAlpha = 0.3f
+        ),
+        exit = slideOutVertically() + shrinkVertically() + fadeOut()
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Button(
+                modifier = Modifier.height(36.dp),
+                onClick = { onClick() },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.white),
+                    contentColor = colorResource(id = R.color.blue),
+                ),
+                shape = CircleShape,
+                content = {
+                    Text(
+                        text = "REDO SEARCH IN THIS AREA",
+                        style = MaterialTheme.typography.subtitle2,
+                        fontWeight = FontWeight(700),
+                    )
+                }
+            )
+        }
     }
 }

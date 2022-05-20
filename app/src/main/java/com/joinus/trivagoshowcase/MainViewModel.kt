@@ -2,6 +2,7 @@ package com.joinus.trivagoshowcase
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository: MainRepository) : ViewModel() {
 
-    private val _viewState = MutableStateFlow(MainViewState())
+    private val _viewState =
+        MutableStateFlow(MainViewState())
     val viewState: StateFlow<MainViewState> = _viewState.asStateFlow()
 
     init {
@@ -23,7 +25,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
 
     fun getBusinesses(lat: Double = 51.233334, lng: Double = 6.783333) {
         viewModelScope.launch(Dispatchers.IO) {
-            _viewState.update { it.copy(isLoading = true) }
+            _viewState.update { it.copy(isLoading = true, refreshButtonIsVisible = false) }
             val response = repository.getBusinesses(lat, lng)
             if (response is ApiResponse.Success) {
                 _viewState.update {

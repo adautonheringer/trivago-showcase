@@ -3,12 +3,19 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/compose-model-1653006479731.xml" value="2.0" />
+        <entry key="../../../../layout/compose-model-1653007099764.xml" value="0.5" />
+        <entry key="../../../../layout/compose-model-1653011070789.xml" value="0.22" />
+        <entry key="../../../../layout/compose-model-1653011775705.xml" value="0.5" />
+        <entry key="../../../../layout/compose-model-1653015396040.xml" value="0.67" />
+        <entry key="app/src/main/res/drawable/oval_shape.xml" value="0.3205" />
         <entry key="app/src/main/res/drawable/rounded_shape.xml" value="0.528" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.30583873957367935" />
         <entry key="app/src/main/res/layout/business_cardview.xml" value="0.33" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="1.0" />
         <entry key="app/src/main/res/layout/fragment_businesses.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_map.xml" value="0.30583873957367935" />
+        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.4484375" />
       </map>
     </option>
   </component>
