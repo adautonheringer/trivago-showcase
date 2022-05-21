@@ -1,12 +1,9 @@
 package com.joinus.trivagoshowcase.features.search
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +39,7 @@ class SearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MessageCard(viewModel) { onRefreshButtonClicked() }
+                SearchBar(viewModel) { onRefreshButtonClicked() }
             }
         }
     }
@@ -55,7 +51,7 @@ class SearchFragment : Fragment() {
 
 
 @Composable
-fun MessageCard(
+fun SearchBar(
     viewModel: MainViewModel,
     onClick: () -> Unit
 ) {
@@ -154,11 +150,4 @@ fun MessageCard(
             }
         }
     }
-
-}
-
-@Preview
-@Composable
-fun PreviewMessageCard() {
-//    MessageCard(isLoading = true)
 }

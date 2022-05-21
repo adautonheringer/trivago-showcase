@@ -8,15 +8,12 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentDetailsBinding
-import com.joinus.trivagoshowcase.helpers.extensions.getNavigationBarHeight
-import com.joinus.trivagoshowcase.helpers.extensions.getStatusBarHeight
 import services.mappers.Business
 
 class DetailsFragment : Fragment() {
@@ -44,30 +41,29 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.root.transitionName = arguments?.getString(ROOT_TRANSITION_NAME)
         binding.image.transitionName = arguments?.getString(IMAGE_TRANSITION_NAME)
         binding.title.transitionName = arguments?.getString(TITLE_TRANSITION_NAME)
-
         Glide
             .with(this)
             .load(business.imageUrl)
             .into(binding.image)
         binding.title.text = business.name
-
-        binding.previous.setOnClickListener {
-            viewModel.onBackPressed()
-        }
-
         lifecycleScope.launchWhenResumed {
             viewModel.detailsViewState
                 .collect {
                     handleLoading(it.isLoading)
                     when {
-                        it.isError -> {}
                         it.businessDetails != null -> {}
                     }
                 }
+        }
+        handleBackClick()
+    }
+
+    private fun handleBackClick() {
+        binding.previous.setOnClickListener {
+            viewModel.onBackPressed()
         }
     }
 
@@ -81,7 +77,6 @@ class DetailsFragment : Fragment() {
         private const val ROOT_TRANSITION_NAME = "rootTransitionName"
         private const val TITLE_TRANSITION_NAME = "titleTransitionName"
         private const val IMAGE_TRANSITION_NAME = "imageTransitionName"
-
 
         fun newInstance(business: Business, sharedViews: List<View>): DetailsFragment {
             val stringedBusiness = Gson().toJson(business)

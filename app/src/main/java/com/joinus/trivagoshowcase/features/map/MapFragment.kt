@@ -10,25 +10,6 @@ import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -45,7 +26,6 @@ import com.joinus.trivagoshowcase.R
 import com.joinus.trivagoshowcase.databinding.FragmentMapBinding
 import com.joinus.trivagoshowcase.helpers.extensions.toDp
 import dagger.hilt.android.AndroidEntryPoint
-
 import services.mappers.Business
 import kotlin.math.*
 
@@ -80,7 +60,6 @@ class MapFragment : Fragment() {
                 .collect {
                     when {
                         it.isLoading -> removeViews()
-                        it.isError -> handleError()
                         it.onRefreshClicked -> getCurrentLatLng()
                         else -> {
                             if (it.businesses.isNotEmpty()) populateMap(it.businesses)
@@ -89,10 +68,6 @@ class MapFragment : Fragment() {
                     }
                 }
         }
-    }
-
-    private fun handleError() {
-
     }
 
     private fun removeViews() {

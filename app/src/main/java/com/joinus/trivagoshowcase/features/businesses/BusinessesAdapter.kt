@@ -31,11 +31,7 @@ class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
     }
 
     override fun onBindViewHolder(holder: BusinessViewHolder, position: Int) {
-        val business = businesses[position]
-
-        holder.apply {
-            bindView(business)
-        }
+        businesses[position].let { holder.bindView(it) }
     }
 
     fun getBusinessByPosition(position: Int): Business {
@@ -71,9 +67,7 @@ class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
     inner class BusinessViewHolder(business: View) :
         RecyclerView.ViewHolder(business) {
 
-
         fun bindView(business: Business) {
-
             val root = itemView.rootView
             val imageView = itemView.findViewById<ImageView>(R.id.image)
             val title = itemView.findViewById<TextView>(R.id.title)
@@ -83,7 +77,6 @@ class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
             val price = itemView.findViewById<TextView>(R.id.price)
             val origin = itemView.findViewById<TextView>(R.id.origin)
             val ratingContainer = itemView.findViewById<ConstraintLayout>(R.id.rating_container)
-
             val sharedViews = listOf<View>(root, imageView, title)
             sharedViews
                 .forEach {
@@ -94,7 +87,6 @@ class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
                 .with(context)
                 .load(business.imageUrl)
                 .into(imageView)
-
             title.text = business.name
             price.text = "$" + business.latLng.latitude.toString().takeLast(3)
             ratingNumber.text = business.rating.times(2).toString()
@@ -133,7 +125,6 @@ class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
                     }
                 }
             }
-
             itemView.setOnClickListener { onClick(business, sharedViews) }
         }
     }

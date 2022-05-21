@@ -16,7 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
@@ -26,46 +25,38 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.28"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1"
-
-            />
+            app:layout_constraintVertical_bias="1" />
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:shimmer_base_alpha="0.9"
-            app:shimmer_highlight_alpha="0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.28"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1"
-            >
-
+            app:shimmer_base_alpha="0.9"
+            app:shimmer_highlight_alpha="0">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-
-                >
+                android:layout_height="match_parent">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card1"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="13dp"
-                    android:layout_marginBottom="13dp"
-                    android:layout_marginEnd="16dp"
                     android:layout_marginStart="0dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="13dp"
                     app:cardCornerRadius="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintWidth_percent="0.10"
-
-                    />
+                    app:layout_constraintWidth_percent="0.10" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card2"
@@ -73,34 +64,29 @@
                     android:layout_height="match_parent"
                     android:layout_margin="13dp"
                     android:background="@color/black"
-                    app:cardCornerRadius="8dp"
-
                     android:scaleX="1.1"
                     android:scaleY="1.1"
+                    app:cardCornerRadius="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintWidth_percent="0.68"
-
-                    />
+                    app:layout_constraintWidth_percent="0.68" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card3"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="13dp"
                     android:layout_marginBottom="13dp"
-                    android:layout_marginStart="16dp"
                     app:cardCornerRadius="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintWidth_percent="0.10"
-
-                    />
+                    app:layout_constraintWidth_percent="0.10" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>

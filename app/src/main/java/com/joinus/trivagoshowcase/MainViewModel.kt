@@ -3,8 +3,13 @@ package com.joinus.trivagoshowcase
 import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joinus.trivagoshowcase.di.IoDispatcher
+import com.joinus.trivagoshowcase.features.businesses.BusinessesViewState
+import com.joinus.trivagoshowcase.features.details.DetailsViewState
+import com.joinus.trivagoshowcase.features.map.MapViewState
+import com.joinus.trivagoshowcase.features.search.SearchViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import repositories.MainRepository
@@ -13,8 +18,10 @@ import services.network.ApiResponse
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val repository: MainRepository) : ViewModel() {
-
+class MainViewModel @Inject constructor(
+    private val repository: MainRepository,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState: StateFlow<MainViewState> = _mainViewState.asStateFlow()
@@ -31,68 +38,41 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
     private val _detailsViewState = MutableStateFlow(DetailsViewState())
     val detailsViewState: StateFlow<DetailsViewState> = _detailsViewState.asStateFlow()
 
-    init {
-        getBusinesses()
-    }
-
     fun getBusinesses(lat: Double = 51.233334, lng: Double = 6.783333) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             _mapViewState.update { it.copy(isLoading = true, onRefreshClicked = false) }
             _businessesViewState.update { it.copy(isLoading = true) }
             _searchViewState.update { it.copy(isLoading = true, isRefreshButtonVisible = false) }
             _mainViewState.update { it.copy(isError = false) }
-            val response = repository.getBusinesses(lat, lng)
-            if (response is ApiResponse.Success) {
-                _mapViewState.update {
-                    it.copy(
-                        isLoading = false,
-                        businesses = response.data,
-                        snapedViewId = null
-                    )
+            when (val response = repository.getBusinesses(lat, lng)) {
+                is ApiResponse.Success -> {
+                    _mapViewState.update { it.copy(isLoading = false, businesses = response.data, snapedViewId = null) }
+                    _businessesViewState.update { it.copy(isLoading = false, businesses = response.data, mapViewPosition = null) }
+                    _searchViewState.update { it.copy(isLoading = false) }
                 }
-                _businessesViewState.update {
-                    it.copy(
-                        isLoading = false,
-                        businesses = response.data,
-                        mapViewPosition = null
-                    )
+                is ApiResponse.Error -> {
+                    _mapViewState.update { it.copy(isLoading = false) }
+                    _businessesViewState.update { it.copy(isLoading = false) }
+                    _searchViewState.update { it.copy(isLoading = false) }
+                    _mainViewState.update { it.copy(isError = true) }
                 }
-                _searchViewState.update { it.copy(isLoading = false) }
-            }
-            if (response is ApiResponse.Error) {
-                _mapViewState.update { it.copy(isLoading = false, isError = true) }
-                _businessesViewState.update { it.copy(isLoading = false, isError = true) }
-                _searchViewState.update { it.copy(isLoading = false, isError = true) }
-                _mainViewState.update { it.copy(isError = true) }
             }
         }
     }
 
     fun getBusinessDetails(business: Business, sharedViews: List<View>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _mainViewState.update {
-                it.copy(
-                    isGoingToBusinessDetails = true,
-                    sharedViews = sharedViews,
-                    business = business
-                )
-            }
+        viewModelScope.launch(dispatcher) {
+            _mainViewState.update { it.copy(isGoingToBusinessDetails = true, sharedViews = sharedViews, business = business)}
             _detailsViewState.update { it.copy(isLoading = true) }
-            val response = repository.getBusinessDetails(business.id)
-            if (response is ApiResponse.Success) {
-                _mainViewState.update {
-                    MainViewState()
+            when (val response = repository.getBusinessDetails(business.id)) {
+                is ApiResponse.Success -> {
+                    _mainViewState.update { MainViewState() }
+                    _detailsViewState.update { it.copy(isLoading = false,businessDetails = response.data) }
                 }
-                _detailsViewState.update {
-                    it.copy(
-                        isLoading = false,
-                        businessDetails = response.data
-                    )
+                is ApiResponse.Error ->  {
+                    _mainViewState.update { it.copy(isGoingToBusinessDetails = false, isError = true) }
+                    _detailsViewState.update { it.copy(isLoading = false) }
                 }
-            }
-            if (response is ApiResponse.Error) {
-                _mainViewState.update { it.copy(isGoingToBusinessDetails = false) }
-                _detailsViewState.update { it.copy(isLoading = false, isError = true) }
             }
         }
     }
@@ -122,10 +102,6 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
         _searchViewState.update { SearchViewState() }
         _mainViewState.update { MainViewState() }
         _detailsViewState.update { DetailsViewState() }
-        _businessesViewState.update { BusinessesViewState() }
-
         getBusinesses()
     }
-
-
 }

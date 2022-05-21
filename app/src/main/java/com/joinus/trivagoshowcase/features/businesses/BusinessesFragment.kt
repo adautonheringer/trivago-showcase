@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
-import com.joinus.trivagoshowcase.BusinessesViewState
 import com.joinus.trivagoshowcase.MainViewModel
 import com.joinus.trivagoshowcase.databinding.FragmentBusinessesBinding
 import com.joinus.trivagoshowcase.helpers.extensions.attachSnapHelperWithListener
@@ -41,16 +40,14 @@ class BusinessesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentBusinessesBinding.inflate(inflater, container, false)
-
+        binding.viewModel = viewModel
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         businessesRecyclerView = binding.recyclerView
-        businessesAdapter =
-            BusinessesAdapter { business, sharedViews -> onBusinessClick(business, sharedViews) }
+        businessesAdapter = BusinessesAdapter { business, views -> onBusinessClick(business, views) }
         myLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         snapHelper = LinearSnapHelper()
         setRecyclerViewLayoutParams(businessesRecyclerView)
@@ -82,7 +79,6 @@ class BusinessesFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             viewModel.businessesViewState.collect {
                 handleLoading(it)
-                handleError(it)
                 handleBusinesses(it)
                 handleScrollToPosition(it.mapViewPosition)
             }
@@ -95,10 +91,6 @@ class BusinessesFragment : Fragment() {
 
     private fun handleBusinesses(state: BusinessesViewState) {
         businessesAdapter.updateList(state.businesses)
-    }
-
-    private fun handleError(state: BusinessesViewState) {
-
     }
 
     private fun handleLoading(state: BusinessesViewState) {
