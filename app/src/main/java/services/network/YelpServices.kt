@@ -16,6 +16,4 @@ interface YelpServices {
     suspend fun getBusinessDetails(
         @Path("id") id: String,
     ): GetBusinessDetailsResponse
-
-
 }

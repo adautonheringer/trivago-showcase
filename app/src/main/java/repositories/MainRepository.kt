@@ -14,13 +14,9 @@ class MainRepository @Inject constructor(private val yelpServices: YelpServices)
 
     suspend fun getBusinesses(lat: Double, lng: Double): ApiResponse<List<Business>> {
         return try {
-            val response = yelpServices
-                .getBusinesses(lat, lng)
-            val businessList = response
-                .businesses.map {
-                    MapperImpl.toBusinessModel(it)
-                }
-            ApiResponse.Success(data = businessList)
+            val response = yelpServices.getBusinesses(lat, lng)
+            val businesses = response.businesses.map { MapperImpl.toBusinessModel(it) }
+            ApiResponse.Success(data = businesses)
         } catch (e: HttpException) {
             ApiResponse.Error(exception = e)
         } catch (e: IOException) {
@@ -30,9 +26,7 @@ class MainRepository @Inject constructor(private val yelpServices: YelpServices)
 
     suspend fun getBusinessDetails(id: String): ApiResponse<BusinessDetails> {
         return try {
-            val response = RetrofitInstance
-                .getYelpServices()
-                .getBusinessDetails(id = id)
+            val response = yelpServices.getBusinessDetails(id = id)
             val businessDetails = MapperImpl.toBusinessDetailModel(response)
             ApiResponse.Success(data = businessDetails)
         } catch (e: HttpException) {

@@ -11,7 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import com.joinus.trivagoshowcase.R
 
-fun Activity.setStatusBarTransparent(view: View, color: Int) {
+fun Activity.setStatusBarColor(view: View, color: Int) {
     this.apply {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = ContextCompat.getColor(this, color)
@@ -31,6 +31,13 @@ fun Activity.setStatusBarTransparent(view: View, color: Int) {
 fun Activity.getNavigationBarHeight(): Int {
     this.resources.let {
         val resId = it.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (resId > 0) it.getDimensionPixelSize(resId) else 0
+    }
+}
+
+fun Activity.getStatusBarHeight(): Int {
+    this.resources.let {
+        val resId = it.getIdentifier("status_bar_height", "dimen", "android")
         return if (resId > 0) it.getDimensionPixelSize(resId) else 0
     }
 }

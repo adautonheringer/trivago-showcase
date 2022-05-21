@@ -16,12 +16,15 @@ android {
         targetSdk 31
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     dataBinding {
         enabled true
+    }
+
+    buildFeatures {
+        compose true
     }
 
     buildTypes {
@@ -36,6 +39,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.1.1'
     }
 }
 
@@ -67,5 +73,32 @@ dependencies {
 
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+
+    // Integration with activities
+    implementation 'androidx.activity:activity-compose:1.4.0'
+    // Compose Material Design
+    implementation 'androidx.compose.material:material:1.1.1'
+    // Animations
+    implementation 'androidx.compose.animation:animation:1.1.1'
+    // Tooling support (Previews, etc.)
+    implementation 'androidx.compose.ui:ui-tooling:1.1.1'
+    // Integration with ViewModels
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.1.1'
+//    implementation 'dev.chrisbanes.accompanist:accompanist-insets:0.6.2'
+
+
+    // Tests
+    testImplementation "org.mockito:mockito-inline:3.11.2"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.9.1"
+
+    //For using viewModelScope
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
+//For runBlockingTest, CoroutineDispatcher etc.
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
+//For InstantTaskExecutorRule
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
 
 }

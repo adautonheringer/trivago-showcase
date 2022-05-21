@@ -1,7 +1,6 @@
 package com.joinus.trivagoshowcase.features.businesses
 
 import android.content.Context
-import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,14 +9,14 @@ import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.joinus.trivagoshowcase.R
 import services.mappers.Business
 
-class BusinessesAdapter(private val onClick: (Business) -> Unit) :
+class BusinessesAdapter(private val onClick: (Business, List<View>) -> Unit) :
     RecyclerView.Adapter<BusinessesAdapter.BusinessViewHolder>() {
 
     private var businesses = listOf<Business>()
@@ -27,14 +26,12 @@ class BusinessesAdapter(private val onClick: (Business) -> Unit) :
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.business_cardview, parent, false)
         setLayoutParams(view, parent.context)
+
         return BusinessViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: BusinessViewHolder, position: Int) {
-        holder.bindView(position)
-        holder.itemView.setOnClickListener {
-            onClick(businesses[position])
-        }
+        businesses[position].let { holder.bindView(it) }
     }
 
     fun getBusinessByPosition(position: Int): Business {
@@ -70,11 +67,9 @@ class BusinessesAdapter(private val onClick: (Business) -> Unit) :
     inner class BusinessViewHolder(business: View) :
         RecyclerView.ViewHolder(business) {
 
-
-        fun bindView(position: Int) {
-//            itemView.id = businesses[position].id.hashCode()
-            val business = businesses[position]
-            val image = itemView.findViewById<ImageView>(R.id.image)
+        fun bindView(business: Business) {
+            val root = itemView.rootView
+            val imageView = itemView.findViewById<ImageView>(R.id.image)
             val title = itemView.findViewById<TextView>(R.id.title)
             val ratingBar = itemView.findViewById<RatingBar>(R.id.rating_bar)
             val ratingWritten = itemView.findViewById<TextView>(R.id.rating_written)
@@ -82,14 +77,20 @@ class BusinessesAdapter(private val onClick: (Business) -> Unit) :
             val price = itemView.findViewById<TextView>(R.id.price)
             val origin = itemView.findViewById<TextView>(R.id.origin)
             val ratingContainer = itemView.findViewById<ConstraintLayout>(R.id.rating_container)
+            val sharedViews = listOf<View>(root, imageView, title)
+            sharedViews
+                .forEach {
+                    ViewCompat.setTransitionName(it, business.id + it.id)
+                }
 
             Glide
                 .with(context)
                 .load(business.imageUrl)
-                .into(image)
-
+                .into(imageView)
             title.text = business.name
+            price.text = "$" + business.latLng.latitude.toString().takeLast(3)
             ratingNumber.text = business.rating.times(2).toString()
+            origin.text = business.categories.last()
             when (business.price.length) {
                 1 -> {
                     ratingBar.numStars = 5
@@ -124,8 +125,7 @@ class BusinessesAdapter(private val onClick: (Business) -> Unit) :
                     }
                 }
             }
-            price.text = "$" + business.latLng.latitude.toString().takeLast(3)
-            origin.text = business.categories.last()
+            itemView.setOnClickListener { onClick(business, sharedViews) }
         }
     }
 }
